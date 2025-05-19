@@ -1,0 +1,7 @@
+Instância: burma14
+Número de cidades: 14
+Melhor rota: [14, 2, 8, 1, 10, 9, 11, 13, 7, 12, 6, 5, 4, 3]
+Distância: 3346.00
+Tempo de execução: 0.48 segundos
+Valor ótimo conhecido: 3323
+Erro percentual: 0.69%
