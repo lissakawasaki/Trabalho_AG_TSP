@@ -238,7 +238,6 @@ def executar_instancia(arquivo_tsp, tamanho_populacao=50, num_geracoes=100, taxa
         print(f"Valor ótimo conhecido para {nome_instancia}: {valor_otimo}")
         print(f"Erro percentual: {erro_percentual:.2f}%")
     
-    # Gera o gráfico de convergência
     nome_grafico = gerar_grafico_convergencia(historico, nome_instancia)
     
 
@@ -258,99 +257,41 @@ def executar_instancia(arquivo_tsp, tamanho_populacao=50, num_geracoes=100, taxa
     return nome_instancia, melhor_distancia, erro_percentual, historico, tempo_execucao, num_cidades
 
 def gerar_resultados(resultados):
-    resultados = """# Relatório: Algoritmo Genético para o Problema do Caixeiro Viajante
+    relatorio = """# Relatório: Algoritmo Genético para o Problema do Caixeiro Viajante
 
 Foram utilizadas três instâncias do TSPLIB com diferentes tamanhos:
 
 """ 
-    # Adiciona informações sobre cada instância
     for resultado in resultados:
         nome, distancia, erro, _, tempo, num_cidades = resultado
-        resultados += f"- **{nome}**: {num_cidades} cidades\n"
-    
-    resultados += """
+        relatorio += f"- **{nome}**: {num_cidades} cidades\n"
+
+    relatorio += """
+
 ## 3. Parâmetros do Algoritmo
 
-Os seguintes parâmetros foram utilizados em todas as execuções:
-
-- Tamanho da População: 50 indivíduos
-- Número de Gerações: 100
-- Taxa de Crossover: 0.8 (80%)
-- Taxa de Mutação: 0.05 (5%)
-- Tamanho do Elitismo: 2 indivíduos
-- Semente Aleatória: 42 (para reprodutibilidade)
+- Tamanho da população: 50  
+- Número de gerações: 100  
+- Taxa de crossover: 0.8  
+- Taxa de mutação: 0.05  
+- Elitismo: 2  
 
 ## 4. Resultados Obtidos
 
-### 4.1 Qualidade das Soluções
-
+| Instância | Nº Cidades | Melhor Distância | Tempo (s) | Erro (%) |
+|-----------|------------|------------------|-----------|----------|
 """
-    
-    # Adiciona tabela de resultados
-    resultados += "| Instância | Cidades | Melhor Distância | Ótimo Conhecido | Erro (%) | Tempo (s) |\n"
-    resultados += "|-----------|---------|------------------|-----------------|----------|----------|\n"
-    
+
     for resultado in resultados:
         nome, distancia, erro, _, tempo, num_cidades = resultado
-        # Valores ótimos conhecidos
-        valores_otimos = {
-            "burma14": 3323,
-            "ulysses16": 6859,
-            "berlin52": 7542,
-            "kroA100": 21282,
-            "pcb442": 50778
-        }
-        otimo = valores_otimos.get(nome, "N/A")
-        erro_str = f"{erro:.2f}" if erro is not None else "N/A"
-        
-        resultados += f"| {nome} | {num_cidades} | {distancia:.2f} | {otimo} | {erro_str} | {tempo:.2f} |\n"
+        erro_formatado = f"{erro:.2f}%" if erro is not None else "N/A"
+        relatorio += f"| {nome} | {num_cidades} | {distancia:.2f} | {tempo:.2f} | {erro_formatado} |\n"
     
-   
-    # Adiciona análise para cada instância
-    for resultado in resultados:
-        nome, distancia, erro, historico, tempo, num_cidades = resultado
-        
-        # Análise simplificada da convergência
-        melhoria_inicial = historico[0] - historico[9]
-        melhoria_final = historico[9] - historico[-1]
-        percentual_melhoria_inicial = (melhoria_inicial / historico[0]) * 100
-        percentual_melhoria_final = (melhoria_final / historico[9]) * 100
-        
-        resultados += f"**{nome} ({num_cidades} cidades)**:\n\n"
-        resultados += f"- Distância inicial: {historico[0]:.2f}\n"
-        resultados += f"- Distância final: {distancia:.2f}\n"
-        resultados += f"- Melhoria nas primeiras 10 gerações: {melhoria_inicial:.2f} ({percentual_melhoria_inicial:.2f}%)\n"
-        resultados += f"- Melhoria nas gerações restantes: {melhoria_final:.2f} ({percentual_melhoria_final:.2f}%)\n"
-        
-        if percentual_melhoria_inicial > percentual_melhoria_final:
-            resultados += "- A convergência foi mais rápida no início e desacelerou nas gerações posteriores.\n\n"
-        else:
-            resultados += "- A convergência foi mais gradual, com melhorias significativas mesmo em gerações avançadas.\n\n"
+    with open("relatorio_resultados.md", "w", encoding="utf-8") as f:
+        f.write(relatorio)
+        print("Relatório salvo como 'relatorio_resultados.md'")
     
-    # Adiciona análise do tempo de execução
-    tempos = [resultado[4] for resultado in resultados]
-    tamanhos = [resultado[5] for resultado in resultados]
-    
-    # Calcula a proporção de aumento
-    if len(tempos) >= 3:
-        proporcao_tempo = tempos[2] / tempos[0]
-        proporcao_tamanho = tamanhos[2] / tamanhos[0]
-        
-        resultados += f"- O tempo de execução aumentou {proporcao_tempo:.2f}x ao passar de {tamanhos[0]} para {tamanhos[2]} cidades.\n"
-        resultados += f"- O número de cidades aumentou {proporcao_tamanho:.2f}x.\n"
-        
-        if proporcao_tempo > proporcao_tamanho:
-            resultados += "- O crescimento do tempo é superlinear em relação ao tamanho da instância, o que é esperado para problemas NP-difíceis como o TSP.\n\n"
-        else:
-            resultados += "- O algoritmo demonstrou boa escalabilidade, com crescimento do tempo próximo ao linear em relação ao tamanho da instância.\n\n"
-    
-    
-    nome_arquivo = "resultados.md"
-    with open(nome_arquivo, "w") as arquivo:
-        arquivo.write(resultados)
-    
-    print(f"Relatório detalhado salvo como {nome_arquivo}")
-    return nome_arquivo
+    return relatorio
 
 def main():
     instancias = ["burma14.tsp", "kroA100.tsp", "pcb442.tsp"]
